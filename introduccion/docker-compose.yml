@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  introduccion-notebook:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/app/src      # Monta código en caliente
+      - ./notebooks:/app/notebooks  # Monta notebooks
+    ports:
+      - "8888:8888"        # Expone Jupyter
+    environment:
+      # Si prefieres usar token, define JUPYTER_TOKEN en tu entorno:
+      JUPYTER_TOKEN: ""
+      JUPYTER_ENABLE_LAB: "yes"
+    command: >
+      start-notebook.sh
+      --NotebookApp.ip='0.0.0.0'
+      --NotebookApp.port=8888
+      --NotebookApp.notebook_dir=/app/notebooks
+      --NotebookApp.token='${JUPYTER_TOKEN}'

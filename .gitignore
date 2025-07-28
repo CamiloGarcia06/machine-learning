@@ -1,0 +1,21 @@
+# Byte-compiled/cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Jupyter output files
+*.nbconvert.ipynb
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# VSCode settings
+.vscode/
+
+# macOS
+.DS_Store
