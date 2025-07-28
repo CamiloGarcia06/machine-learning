@@ -4,10 +4,10 @@
 COMPOSE := docker-compose -f docker-compose.yml
 SERVICE := introduccion-notebook
 
-.PHONY: build up down restart logs shell notebook requirements
+.PHONY: build up down restart logs shell notebook requirements rm
 
-# Genera o actualiza requirements.txt basados en dependencias comunes de ML
-requirements: ## Crea requirements.txt con las librerías del Colab
+requirements: ## Crear o actualizar requirements.txt con las librerías de ML
+	@echo "Generando requirements.txt..."
 	echo "numpy" > requirements.txt
 	echo "scipy" >> requirements.txt
 	echo "matplotlib" >> requirements.txt
@@ -20,7 +20,7 @@ build: down requirements ## Reconstruir red, dependencias y contenedores
 up: ## Levantar contenedor en background
 	$(COMPOSE) up -d
 
-# Detiene y elimina contenedores y redes
+# Detener y eliminar contenedores y redes
 down: ## Parar y eliminar contenedores y red
 	$(COMPOSE) down
 
@@ -34,3 +34,12 @@ shell: ## Acceder a una shell dentro del contenedor
 
 notebook: ## Mostrar URL del notebook
 	@echo "Abre en tu navegador: http://localhost:8888/?token=$$JUPYTER_TOKEN"
+
+rm: ## Eliminar contenedores, redes e imágenes con confirmación
+	@read -p "¿Deseas eliminar contenedores, redes e imágenes? (se perderán datos) (y/n) " confirmation; \
+	if [ $$confirmation = "y" ]; then \
+		echo "Ejecutando eliminación..."; \
+		$(COMPOSE) down --rmi all -v --remove-orphans; \
+	else \
+		echo "Operación cancelada."; \
+	fi
