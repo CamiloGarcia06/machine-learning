@@ -111,3 +111,28 @@ Si detectas errores o sugerencias:
 **Autor:** Juan Camilo Sandoval Garcia
 **GitHub:** @CamiloGarcia06
 **Fecha de creación:** 28 Jul 2025
+
+---
+
+## 🏗️ Generar plantilla de trabajo desde consola
+
+El script `create_work.sh` ya está incluido en la raíz del repositorio. Para ejecutarlo, sigue estos pasos:
+
+1. Otorga permisos de ejecución:
+
+   ```bash
+   chmod +x create_work.sh
+   ```
+2. Ejecuta el script indicando el nombre del nuevo trabajo:
+
+   ```bash
+   ./create_work.sh <nombre_del_trabajo>
+   ```
+
+Por ejemplo, para crear una carpeta llamada `clasificador_mnist`:
+
+```bash
+./create_work.sh clasificador_mnist
+```
+
+Esto generará la estructura completa con los archivos base (`Dockerfile`, `docker-compose.yml`, `Makefile`, `README.md`, `src/`, `notebooks/`).
