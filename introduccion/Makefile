@@ -1,45 +1,56 @@
-# Makefile para el proyecto "introduccion"
-# Simplifica comandos Docker y docker-compose
+# DO NOT CHANGE
+MAIN_DIR := $(shell git rev-parse --show-toplevel)
+DOCKER_DIR := $(MAIN_DIR)/introduccion
+PROJECT_NAME ?= introduccion
 
-COMPOSE := docker-compose -f docker-compose.yml
-SERVICE := introduccion-notebook
+# Definición de docker-compose sin file de entorno para evitar errores si no existe .env
+COMPOSE := docker compose -f $(DOCKER_DIR)/docker-compose.yml --project-name $(PROJECT_NAME)
+SERVICE := $(PROJECT_NAME)-notebook
 
-.PHONY: build up down restart logs shell notebook requirements rm
+.PHONY: help requirements build up down restart logs shell notebook rm
 
-requirements: ## Crear o actualizar requirements.txt con las librerías de ML
-	@echo "Generando requirements.txt..."
-	echo "numpy" > requirements.txt
-	echo "scipy" >> requirements.txt
-	echo "matplotlib" >> requirements.txt
-	echo "pandas" >> requirements.txt
-	echo "scikit-learn" >> requirements.txt
+help: ## Muestra los comandos disponibles
+	@grep -E '^[^[:space:]]+:.*?## ' $(MAKEFILE_LIST) \
+		| awk 'BEGIN {FS = ":.*## "} {printf "make %-12s # %s\n", $$1, $$2}'
 
-build: down requirements ## Reconstruir red, dependencias y contenedores
+requirements: ## Genera requirements.txt con librerías de ML
+	@echo "Generando requirements.txt en $(DOCKER_DIR)..."
+	echo "numpy" > $(DOCKER_DIR)/requirements.txt
+	echo "scipy" >> $(DOCKER_DIR)/requirements.txt
+	echo "matplotlib" >> $(DOCKER_DIR)/requirements.txt
+	echo "pandas" >> $(DOCKER_DIR)/requirements.txt
+	echo "scikit-learn" >> $(DOCKER_DIR)/requirements.txt
+
+build: down requirements ## Reconstruir dependencias y contenedores
 	$(COMPOSE) up --build -d
 
-up: ## Levantar contenedor en background
+up: ## Levantar contenedores en background
 	$(COMPOSE) up -d
 
-# Detener y eliminar contenedores y redes
-down: ## Parar y eliminar contenedores y red
-	$(COMPOSE) down
+down: ## Parar y eliminar contenedores y redes
+down:
+	$(COMPOSE) down -v --remove-orphans
 
-restart: down up ## Reiniciar contenedor
+restart: ## Reiniciar contenedores
+	$(COMPOSE) restart
 
 logs: ## Seguir logs del servicio
 	$(COMPOSE) logs -f
 
-shell: ## Acceder a una shell dentro del contenedor
+shell: ## Abrir shell dentro del contenedor principal
 	$(COMPOSE) exec $(SERVICE) bash
 
-notebook: ## Mostrar URL del notebook
-	@echo "Abre en tu navegador: http://localhost:8888/?token=$$JUPYTER_TOKEN"
+notebook: ## Mostrar URL de Jupyter
+	@echo "Abre en navegador: http://localhost:8888"
 
-rm: ## Eliminar contenedores, redes e imágenes con confirmación
-	@read -p "¿Deseas eliminar contenedores, redes e imágenes? (se perderán datos) (y/n) " confirmation; \
-	if [ $$confirmation = "y" ]; then \
-		echo "Ejecutando eliminación..."; \
-		$(COMPOSE) down --rmi all -v --remove-orphans; \
+rm: ## Eliminar contenedores, redes y limpiar imágenes
+	@read -p "¿Eliminar todos los recursos Docker para $(PROJECT_NAME)? (y/n) " resp; \
+	if [ "$$resp" = "y" ]; then \
+		echo "Deteniendo y removiendo contenedores y redes..."; \
+		$(COMPOSE) down -v --remove-orphans; \
+		echo "Limpiando imágenes no usadas..."; \
+		docker image prune -a -f; \
+		echo "Operación completada."; \
 	else \
 		echo "Operación cancelada."; \
 	fi
