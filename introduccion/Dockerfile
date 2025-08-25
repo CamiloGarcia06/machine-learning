@@ -5,7 +5,6 @@ FROM jupyter/scipy-notebook:latest
 WORKDIR /app
 
 # Copia código fuente y notebooks
-COPY src/ /app/src/
 COPY notebooks/ /app/notebooks/
 
 # Copia el archivo de dependencias y las instala
