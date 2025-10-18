@@ -5,18 +5,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    user: "1000:1000"
     volumes:
-      - ./src:/app/src      # Monta código en caliente
-      - ./notebooks:/app/notebooks  # Monta notebooks
+      - ./src:/home/jovyan/src
+      - ./notebooks:/home/jovyan/notebooks
     ports:
-      - "8888:8888"        # Expone Jupyter
+      - "8888:8888"
     environment:
-      # Si prefieres usar token, define JUPYTER_TOKEN en tu entorno:
       JUPYTER_TOKEN: ""
       JUPYTER_ENABLE_LAB: "yes"
     command: >
       start-notebook.sh
-      --NotebookApp.ip='0.0.0.0'
+      --NotebookApp.ip=0.0.0.0
       --NotebookApp.port=8888
-      --NotebookApp.notebook_dir=/app/notebooks
+      --NotebookApp.notebook_dir=/home/jovyan/notebooks
       --NotebookApp.token='${JUPYTER_TOKEN}'
+    shm_size: "2g"

@@ -1,18 +1,20 @@
-# Usa una imagen oficial de Jupyter con SciPy y soporte para notebook
-FROM jupyter/scipy-notebook:latest
+# Imagen oficial del stack Jupyter con TensorFlow ya instalado (CPU)
+FROM quay.io/jupyter/tensorflow-notebook:python-3.11
 
-# Directorio de trabajo dentro del contenedor
-WORKDIR /app
+# Paquetes de sistema opcionales
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+USER $NB_USER
 
-# Copia código fuente y notebooks
-COPY notebooks/ /app/notebooks/
+WORKDIR /home/jovyan
 
-# Copia el archivo de dependencias y las instala
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# (Opcional) instala extras de tu requirements si los tienes
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    if [ -f /tmp/requirements.txt ]; then pip install --no-cache-dir -r /tmp/requirements.txt; fi
 
-# Exponer el puerto de Jupyter
+RUN mkdir -p /home/jovyan/notebooks
 EXPOSE 8888
 
-# Arranca Jupyter Lab en el directorio de notebooks
-CMD ["start-notebook.sh", "--NotebookApp.ip=0.0.0.0", "--NotebookApp.port=8888", "--NotebookApp.notebook_dir=/app/notebooks", "--NotebookApp.token=''"]
+CMD ["start-notebook.sh", "--NotebookApp.ip=0.0.0.0", "--NotebookApp.port=8888", "--NotebookApp.notebook_dir=/home/jovyan/notebooks", "--NotebookApp.token=''"]
