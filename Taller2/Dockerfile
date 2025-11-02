@@ -29,6 +29,7 @@ RUN python -m pip install --upgrade pip setuptools wheel \
     numpy \
     joblib \
     matplotlib \
+    seaborn \
     jupyterlab \
     ipywidgets \
     python-dotenv \
