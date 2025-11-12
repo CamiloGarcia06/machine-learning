@@ -1,0 +1,29 @@
+{
+  "best_k": 2,
+  "random_state": 42,
+  "metrics": {
+    "silhouette": 0.13590008448308863,
+    "calinski_harabasz": 306.1692712235588,
+    "davies_bouldin": 2.368243836441464
+  },
+  "versions": {
+    "python": "3.11.14 (main, Nov  4 2025, 04:28:22) [GCC 14.2.0]",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "scikit_learn": "1.7.2"
+  },
+  "features": [
+    "age",
+    "gender",
+    "education",
+    "country",
+    "ethnicity",
+    "Nscore",
+    "Escore",
+    "Oscore",
+    "Ascore",
+    "Cscore",
+    "impulsive",
+    "SS"
+  ]
+}

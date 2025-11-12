@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ml-taller-app
+    working_dir: /app
+    volumes:
+      - ./:/app
+    tty: true
+    stdin_open: true
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ml-taller-jupyter
+    working_dir: /app
+    command: >
+      jupyter lab
+      --ip=0.0.0.0
+      --port=8888
+      --no-browser
+      --ServerApp.root_dir=/app
+      --ServerApp.token='${JUPYTER_TOKEN}'
+      --ServerApp.password=''
+      --ServerApp.disable_check_xsrf=True
+      --ServerApp.allow_remote_access=True
+      --ServerApp.allow_origin='*'
+      --ServerApp.trust_xheaders=True
+      --NotebookApp.disable_check_xsrf=True
+      --NotebookApp.allow_origin='*'
+    ports:
+      - "127.0.0.1:8888:8888"
+    environment:
+      JUPYTER_TOKEN: ""
+      JUPYTER_ENABLE_LAB: "yes"
+    volumes:
+      - ./:/app
+    tty: true
+    stdin_open: true
+    shm_size: "2g"

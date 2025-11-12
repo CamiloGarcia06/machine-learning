@@ -1,0 +1,79 @@
+{
+  "age": {
+    "invalid_count_before_snap": 0,
+    "invalid_count_after_snap": 0
+  },
+  "gender": {
+    "invalid_count_before_snap": 0,
+    "invalid_count_after_snap": 0
+  },
+  "education": {
+    "invalid_count_before_snap": 0,
+    "invalid_count_after_snap": 0
+  },
+  "country": {
+    "invalid_count_before_snap": 0,
+    "invalid_count_after_snap": 0
+  },
+  "ethnicity": {
+    "invalid_count_before_snap": 0,
+    "invalid_count_after_snap": 0
+  },
+  "alcohol": {
+    "invalid_count": 0
+  },
+  "amphet": {
+    "invalid_count": 0
+  },
+  "amyl": {
+    "invalid_count": 0
+  },
+  "benzos": {
+    "invalid_count": 0
+  },
+  "caff": {
+    "invalid_count": 0
+  },
+  "cannabis": {
+    "invalid_count": 0
+  },
+  "choc": {
+    "invalid_count": 0
+  },
+  "coke": {
+    "invalid_count": 0
+  },
+  "crack": {
+    "invalid_count": 0
+  },
+  "ecstasy": {
+    "invalid_count": 0
+  },
+  "heroin": {
+    "invalid_count": 0
+  },
+  "ketamine": {
+    "invalid_count": 0
+  },
+  "legalh": {
+    "invalid_count": 0
+  },
+  "lsd": {
+    "invalid_count": 0
+  },
+  "meth": {
+    "invalid_count": 0
+  },
+  "mushrooms": {
+    "invalid_count": 0
+  },
+  "nicotine": {
+    "invalid_count": 0
+  },
+  "semer": {
+    "invalid_count": 0
+  },
+  "vsa": {
+    "invalid_count": 0
+  }
+}
