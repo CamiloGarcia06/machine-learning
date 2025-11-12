@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dibuja dígito 8×8</title>
+<style>
+  :root { --cell: 36px; --gap: 6px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+  body { margin: 24px; color: #0f172a; background: #f8fafc; }
+  h1 { font-size: 18px; margin: 0 0 12px; }
+  .wrap { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: start; }
+  .grid { display: grid; grid-template-columns: repeat(8, var(--cell)); grid-template-rows: repeat(8, var(--cell)); gap: var(--gap); background: #e2e8f0; padding: var(--gap); border-radius: 12px; box-shadow: 0 6px 14px rgba(2,6,23,.08); }
+  .cell { width: var(--cell); height: var(--cell); border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(2,6,23,.06); cursor: crosshair; user-select: none; }
+  .panel { display: grid; gap: 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button { padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; background: white; cursor: pointer; }
+  button:hover { background: #f1f5f9; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  .small { font-size: 12px; color: #475569; }
+  .sep { height: 1px; background: #e2e8f0; margin: 4px 0; }
+  input[type="range"]{ width: 180px; }
+  .preview { display: grid; grid-auto-flow: column; gap: 12px; align-items: center; }
+  .box { width: 128px; height: 128px; image-rendering: pixelated; border-radius: 12px; box-shadow: 0 6px 14px rgba(2,6,23,.08); }
+  .note { background: #fff; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; }
+</style>
+</head>
+<body>
+  <h1>Dibujar dígito 8×8 (exportar como (1,64))</h1>
+  <div class="wrap">
+    <div class="grid" id="grid"></div>
+    <div class="panel">
+      <div class="row">
+        <label>✍️ Intensidad por trazo:
+          <input id="step" type="range" min="1" max="4" step="1" value="2">
+        </label>
+        <label><input id="invert" type="checkbox" checked> Fondo blanco (invertir visual)</label>
+        <label><input id="snap" type="checkbox" checked> Arrastrar para dibujar</label>
+      </div>
+
+      <div class="row">
+        <button id="clear">Limpiar</button>
+        <button id="half">Medias tintas</button>
+        <button id="border">Bordes</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="row">
+        <button id="copy016">Copiar como (1,64) en 0–16</button>
+        <button id="copy01">Copiar como (1,64) en 0–1</button>
+        <button id="py">Copiar snippet NumPy</button>
+      </div>
+
+      <div class="row">
+        <button id="png8">Descargar PNG 8×8</button>
+        <button id="png128">Descargar PNG 128×128</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="preview">
+        <canvas id="canvas8" width="8" height="8" class="box"></canvas>
+        <div class="note small">
+          <div>• Click izquierdo: oscurecer</div>
+          <div>• Click derecho: aclarar</div>
+          <div>• Exporta en la misma escala que <span class="mono">sklearn.digits</span> (0–16) o normalizado 0–1.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const grid = document.getElementById('grid');
+  const invertChk = document.getElementById('invert');
+  const stepEl = document.getElementById('step');
+  const snapChk = document.getElementById('snap');
+  const N = 8, MAX=16;
+  let vals = Array.from({length:N*N}, ()=>0);
+  let drawing = false, mode = +1;
+
+  // crear celdas
+  const cells = [];
+  for (let i=0;i<N*N;i++){
+    const d = document.createElement('div');
+    d.className = 'cell';
+    d.dataset.idx = i;
+    grid.appendChild(d);
+    cells.push(d);
+  }
+
+  // helpers
+  const clamp = (v, a, b)=> Math.max(a, Math.min(b, v));
+  function shadeToRgb(v){
+    // v en 0..16 -> gris; si invert está ON, 0=blanco y 16=negro (estilo papel)
+    const g = invertChk.checked ? 255 - Math.round(v*255/MAX) : Math.round(v*255/MAX);
+    return `rgb(${g},${g},${g})`;
+  }
+  function paint(i){
+    vals[i] = clamp(vals[i] + mode * Number(stepEl.value), 0, MAX);
+    cells[i].style.background = shadeToRgb(vals[i]);
+    drawCanvas();
+  }
+  function drawCanvas(){
+    const c = document.getElementById('canvas8');
+    const ctx = c.getContext('2d', {willReadFrequently:true});
+    const img = ctx.createImageData(N, N);
+    for(let y=0;y<N;y++){
+      for(let x=0;x<N;x++){
+        const v = vals[y*N+x];
+        const g = invertChk.checked ? 255 - Math.round(v*255/MAX) : Math.round(v*255/MAX);
+        const k = (y*N+x)*4;
+        img.data[k+0]=g; img.data[k+1]=g; img.data[k+2]=g; img.data[k+3]=255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    // upscale visual is via CSS image-rendering: pixelated
+  }
+  function flatten016(){ return "[" + vals.map(v=>v.toFixed(0)).join(", ") + "]"; }
+  function flatten01(){ return "[" + vals.map(v=>(v/MAX).toFixed(6)).join(", ") + "]"; }
+  function copy(txt){
+    navigator.clipboard.writeText(txt);
+    alert("Copiado al portapapeles ✓");
+  }
+  // eventos
+  cells.forEach(d=>{
+    d.addEventListener('contextmenu', e=> e.preventDefault());
+    d.addEventListener('mousedown', e=>{
+      drawing = true;
+      mode = (e.button===2)? -1 : +1; // derecho aclara
+      paint(+d.dataset.idx);
+    });
+    d.addEventListener('mouseenter', ()=>{
+      if (drawing && snapChk.checked) paint(+d.dataset.idx);
+    });
+  });
+  window.addEventListener('mouseup', ()=> drawing=false);
+  invertChk.addEventListener('change', drawCanvas);
+
+  // botones
+  document.getElementById('clear').onclick = ()=>{ vals.fill(0); cells.forEach((c,i)=>c.style.background=shadeToRgb(vals[i])); drawCanvas(); };
+  document.getElementById('half').onclick = ()=>{ vals = vals.map(v=>clamp(v+8,0,MAX)); cells.forEach((c,i)=>c.style.background=shadeToRgb(vals[i])); drawCanvas(); };
+  document.getElementById('border').onclick = ()=>{
+    // borde rápido para ayudar a centrar
+    for (let y=0;y<N;y++) for (let x=0;x<N;x++){
+      const i = y*N+x;
+      if (x===0||x===N-1||y===0||y===N-1) { vals[i]=0; cells[i].style.background=shadeToRgb(vals[i]); }
+    }
+    drawCanvas();
+  };
+
+  document.getElementById('copy016').onclick = ()=> copy("np.array(" + flatten016() + ", dtype=float).reshape(1,64)");
+  document.getElementById('copy01').onclick  = ()=> copy("np.array(" + flatten01()  + ", dtype=float).reshape(1,64)");
+  document.getElementById('py').onclick = ()=>{
+    const txt = "x = np.array(" + flatten016() + ", dtype=float).reshape(1,64)  # escala 0..16, como sklearn.digits\n" +
+                "x01 = x/16.0  # escala 0..1 si tu entrenamiento está normalizado";
+    copy(txt);
+  };
+
+  function downloadPng(scale){
+    const c = document.createElement('canvas');
+    c.width=N; c.height=N;
+    const ctx = c.getContext('2d');
+    const src = document.getElementById('canvas8');
+    ctx.drawImage(src,0,0);
+    const out = document.createElement('canvas');
+    out.width=N*scale; out.height=N*scale;
+    const octx = out.getContext('2d');
+    octx.imageSmoothingEnabled=false;
+    octx.drawImage(c,0,0,out.width,out.height);
+    const a = document.createElement('a');
+    a.href = out.toDataURL('image/png');
+    a.download = scale===1? 'digit_8x8.png':'digit_128.png';
+    a.click();
+  }
+  document.getElementById('png8').onclick   = ()=> downloadPng(1);
+  document.getElementById('png128').onclick = ()=> downloadPng(16);
+
+  // init
+  cells.forEach((c,i)=> c.style.background=shadeToRgb(vals[i]));
+  drawCanvas();
+</script>
+</body>
+</html>
