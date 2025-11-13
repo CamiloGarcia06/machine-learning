@@ -236,5 +236,3 @@ El dataset proviene de UCI Machine Learning Repository. Consulta y respeta su li
 Este repo es solo con fines académicos.
 
 ---
-
-¡Listo! Si quieres, puedo adaptar este README a la estructura exacta de tu repo (nombres de carpeta, servicios del `docker-compose`, etc.).
